@@ -5,7 +5,7 @@ const chatRouter = require("./routes/chat");
 const mongoose = require("mongoose");
 const dbconfig = require("./config/db.json");
 const bodyParser = require("body-parser");
-const UserRouter=require ("./services/user");
+const UserRouter=require ("./routes/user");
 
 var app = express();
 app.set("views",path.join(__dirname,"views"));

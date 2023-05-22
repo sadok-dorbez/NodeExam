@@ -3,110 +3,133 @@ const express=require('express');
 var router=express.Router();
 const user=require('../modele/user')
 
-router.get('/show',(req,res,next)=>{
-    res.send('You are welcome');
-    
-});
-////////////////////////////////// Post By parameters
-router.post('/add/:name/:email/:cin',(req,res,next)=>{
-    console.log("notre data :"+JSON.stringify(req.params));
-    new user({
-        name:req.params.name,
-        email:req.params.email,
-        cin:req.params.cin
-    }).save((err,data)=>{
-        if(err){
-            console.log(err);
-        }
-        console.log(data);
-        res.json(data);
-
-    });
-});
-
-router.put("/:id",async function(req,res){
+exports.add= async (req,res)=>
+{
     try{
-        await user.findByIdAndUpdate(req.params.id,req.body,{new:true});
-        res.send("updated successfully");
-
-    }catch(err){
-        res.send(err)
-    }
-})
-
-
-router.delete("/delete/:id",async function(req,res){
-    try{
-        await user.findByIdAndRemove(req.params.id);
-        res.send("deleted successfully");
-
-    }catch(err){
-        res.send(err)
-    }
-})
-
-
-
-
-
-/*router.post("/add", async function(req,res,next){
-    console.log("resultat:"+req.body);
-    try{
-
-        const User=new user(...req.body);
-        await User.save();
-    } catch(err){
-        console.log(err);
-    }
-   
-
-});*/
-
-///////////////////////////////////////// Post By Json BodyRequest
-
-router.post("/",(req,res,next)=>{
-   // console.log("resultat:"+req.body);
-    try{
-
-        const User=new user(req.body);
-        User.save();
-        //res.json(req.body);
-        res.send("added successfully");
-    } catch(err){
-        console.log(err);
-    }
-   
-
-});
-
-/////////////////////////////////////// Get all list
-router.get('/', async (req, res) => {
-    try{
-        const data = await user.find();
-        res.json(data)
+        const newuser = new user(
+            
+            {
+                name: req.body.name,
+                email: req.body.email,
+                cin: req.body.cin
+                
+            }
+        );
+        await newuser.save();
+        res.send({response:newuser, message:"user is saved"});
+       
     }
     catch(error){
-        res.status(500).json({message: error.message})
+    
+        res.send({message:"can not save user"});
+       
     }
-})
-
-
-
-router.get("/getbycin/:cin", async (req, res, next) => {
-    try {
-      const c = parseInt(req.params.cin);
-      if (c < 0) {
-        throw new Error("cin must be positive");
-      }
-  
-      const data = await user.find({ cin: c });
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ message: error.message });
+}
+//modify
+exports.modify= async (req,res)=>
+{
+    try{
+        const id = req.params.id;
+        const result = await user.updateOne({_id:id},{$set:{...req.body}});
+        if(result.nModified===0)
+        {
+            res.send({message:"user is already updated"});
+            return;
+        }
+        res.send({message:"user is updated"});
     }
-  });
-  
+    catch(error){
+        res.send({message:"there is no user with this id"});
+    }
+}
+//remove
+exports.remove= async (req,res)=>
+{
+    try{
+        const id = req.params.id;
+        const result = await user.deleteOne({_id:id});
+        if(result.deletedCount===0)
+        {
+            res.send({message:"user is already deleted"});
+            return;
+        }
+        res.send({message:"user is deleted"});
+    }
+    catch(error){
+        res.send({message:"there is no user with this id"});
+    }
 
+}
+//get all
 
- 
-module.exports=router;
+exports.getAll= async (req,res)=>
+{
+    try{
+        const result = await user.find();
+        res.send({response:result, message:"users are found"});
+    }
+    catch(error){
+        res.send({message:"there is no user"});
+    }
+}
+
+//get one
+exports.getOne= async (req,res)=>
+{
+    try{
+        const id = req.params.id;
+        const result = await user.findOne({_id:id});
+        res.send({response:result, message:"user is found"});
+    }
+    catch(error){
+        res.send({message:"there is no user with this id"});
+    }
+}
+//get by email
+exports.getByEmail= async (req,res)=>
+{
+    try{
+        const email = req.params.email;
+        const result = await user.findOne({email:email});
+        res.send({response:result, message:"user is found"});
+    }
+    catch(error){
+        res.send({message:"there is no user with this email"});
+    }
+}
+//get by cin
+exports.getByCin= async (req,res)=>
+{
+    try{
+        const cin = req.params.cin;
+        const result = await user.findOne({cin:cin});
+        res.send({response:result, message:"user is found"});
+    }
+    catch(error){
+        res.send({message:"there is no user with this cin"});
+    }
+}
+//get by name
+exports.getByName= async (req,res)=>
+{
+    try{
+        const name = req.params.name;
+        const result = await user.findOne({name:name});
+        res.send({response:result, message:"user is found"});
+    }
+    catch(error){
+        res.send({message:"there is no user with this name"});
+    }
+}
+//get by id
+exports.getById= async (req,res)=>
+{
+    try{
+        const id = req.params.id;
+        const result = await user.findOne({_id:id});
+        res.send({response:result, message:"user is found"});
+    }
+    catch(error){
+        res.send({message:"there is no user with this id"});
+    }
+}
